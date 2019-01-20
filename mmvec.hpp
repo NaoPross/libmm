@@ -53,8 +53,22 @@ struct mm::basic_vec : public std::array<T, d> {
     template<std::size_t n> basic_vec(const basic_vec<T, n>& other);
 
     T length() const;
+
+    template<std::size_t n>
+    basic_vec<T, d>& operator=(const mm::basic_vec<T, n>& other);
+
+    template<std::size_t n>
+    basic_vec<T, d>& operator+=(const mm::basic_vec<T, n>& other);
+
+    template<std::size_t n>
+    basic_vec<T, d>& operator-=(const mm::basic_vec<T, n>& other);
+
+
+    basic_vec<T, d>& operator*=(const T& scalar);
 };
 
+
+// member functions for basic_vec
 
 template<typename T, std::size_t d>
 mm::basic_vec<T, d>::basic_vec() : std::array<T, d>() {
@@ -76,13 +90,8 @@ template<std::size_t n>
 mm::basic_vec<T, d>::basic_vec(const mm::basic_vec<T, n>& other) {
     // construct with empty values
     basic_vec();
-
-    static_assert(
-        d >= n, 
-        "cannot copy higher dimensional vector into a smaller one"
-    );
-
-    std::copy(other.begin(), other.end(), this->begin());
+    // uses operator=
+    *this = other;
 }
 
 template<typename T, std::size_t d>
@@ -94,6 +103,45 @@ T mm::basic_vec<T, d>::length() const {
         }
     ));
 }
+
+
+// memeber operator overloads for basic_vec
+
+template<typename T, std::size_t d>
+template<std::size_t n>
+mm::basic_vec<T, d>& mm::basic_vec<T, d>::operator=(const mm::basic_vec<T, n>& other) {
+    static_assert(
+        d >= n, 
+        "cannot copy higher dimensional vector into a smaller one"
+    );
+
+    std::copy(other.begin(), other.end(), this->begin());
+
+    return *this;
+}
+
+template<typename T, std::size_t d>
+template<std::size_t n>
+mm::basic_vec<T, d>& mm::basic_vec<T, d>::operator+=(const mm::basic_vec<T, n>& other) {
+    *this = *this + other;
+    return *this;
+}
+
+template<typename T, std::size_t d>
+template<std::size_t n>
+mm::basic_vec<T, d>& mm::basic_vec<T, d>::operator-=(const mm::basic_vec<T, n>& other) {
+    *this = *this - other;
+    return *this;
+}
+
+template<typename T, std::size_t d>
+mm::basic_vec<T, d>& mm::basic_vec<T, d>::operator*=(const T& scalar) {
+    *this = *this * scalar;
+    return *this;
+}
+
+
+// operator overloads for basic_vec
 
 template<typename T, std::size_t d>
 mm::basic_vec<T, d> operator+(const mm::basic_vec<T, d>& rhs, const mm::basic_vec<T, d>& lhs) {
@@ -146,7 +194,9 @@ std::ostream& operator<<(std::ostream& os, const mm::basic_vec<T, d>& v) {
     return os;
 }
 
-// actual classes to use in your code
+
+// actual vectors to use in your code
+
 template<typename T, std::size_t d>
 class mm::vec: public mm::basic_vec<T, d> {
 public:
@@ -156,7 +206,10 @@ public:
     vec(const basic_vec<T, n>& other) : basic_vec<T, d>(other) {}
 };
 
+
 // three dimensional specialization with a static cross product
+// TODO: specialize operator+ for spherical coordinates
+
 template<typename T>
 class mm::vec3 : public mm::basic_vec<T, 3> {
 public:
@@ -211,7 +264,10 @@ mm::vec3<T> mm::vec3<T>::cross(const vec3<T>& rhs, const vec3<T>& lhs) {
     return res;
 }
 
+
 // two dimensional specialization with a polar conversion
+// TODO: specialize operator+ for polar coordinates
+
 template<typename T>
 class mm::vec2: public mm::basic_vec<T, 2> {
 public:

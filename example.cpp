@@ -21,6 +21,8 @@ int main(int argc, char *argv[]) {
 	std::cout << "u * v = " << u * v << std::endl;
 	std::cout << std::endl;
 
+	u += v;
+
 	// three dimensional vectors
 	std::cout << "three dimensional (double) vectors" << std::endl;
 
@@ -37,6 +39,8 @@ int main(int argc, char *argv[]) {
 	std::cout << "spherical(a) = " << a.spherical() << std::endl;
 	std::cout << std::endl;
 
+	a -= b;
+
 	// two dimensional vector
 	std::cout << "two dimensional (complex) vectors" << std::endl;
 
@@ -51,6 +55,8 @@ int main(int argc, char *argv[]) {
 	std::cout << "angle(j) = " << j.angle() << std::endl;
 	std::cout << "polar(j) = " << j.polar() << std::endl;
 	std::cout << std::endl;
+
+	j *= 10;
 
 	return 0;
 }
