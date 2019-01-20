@@ -1,4 +1,4 @@
-/* vector.hpp
+/* mmvec.hpp
  * Part of Mathematical library built (ab)using Modern C++ 17 abstractions.
  *
  * This library is not intended to be _performant_, it does not contain
