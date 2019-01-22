@@ -13,11 +13,12 @@
  * Naoki Pross <naopross@thearcway.org>
  * 2018 ~ 2019
  */
-#include <iostream>
+#pragma once
 
 #include <cassert>
 #include <cmath>
 
+#include <iostream>
 #include <array>
 #include <algorithm>
 #include <numeric>
@@ -111,8 +112,7 @@ template<typename T, std::size_t d>
 template<std::size_t n>
 mm::basic_vec<T, d>& mm::basic_vec<T, d>::operator=(const mm::basic_vec<T, n>& other) {
     static_assert(
-        d >= n, 
-        "cannot copy higher dimensional vector into a smaller one"
+        d >= n, "cannot copy higher dimensional vector into a smaller one"
     );
 
     std::copy(other.begin(), other.end(), this->begin());

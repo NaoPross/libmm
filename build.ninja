@@ -1,0 +1,6 @@
+include ninja/rules.ninja
+
+build build/mmvec.o: cpp mmvec.cpp
+
+build build/libmm.a: link-static build/mmvec.o
+build build/libmm.so: link-shared build/mmvec.o
