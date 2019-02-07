@@ -51,12 +51,21 @@ struct mm::basic_vec : public std::array<T, d> {
 
     basic_vec();
     basic_vec(const std::initializer_list<T> l);
+
+    // copyable to a vector of size n <= d
     template<std::size_t n> basic_vec(const basic_vec<T, n>& other);
+    // movable to a vector of size n <= d
+    template<std::size_t n> basic_vec(basic_vec<T, n>&& other);
 
     T length() const;
 
+    // copy operator=
     template<std::size_t n>
     basic_vec<T, d>& operator=(const mm::basic_vec<T, n>& other);
+
+    // move operator=
+    template<std::size_t n>
+    basic_vec<T, d>& operator=(mm::basic_vec<T, n>&& other);
 
     template<std::size_t n>
     basic_vec<T, d>& operator+=(const mm::basic_vec<T, n>& other);
@@ -78,9 +87,6 @@ mm::basic_vec<T, d>::basic_vec() : std::array<T, d>() {
 
 template<typename T, std::size_t d>
 mm::basic_vec<T, d>::basic_vec(const std::initializer_list<T> l) {
-    // construct with empty values
-    basic_vec();
-
     // why can't this sh*t be a constexpr with static_assert???
     assert(l.size() <= d);
     std::copy(l.begin(), l.end(), this->begin());
@@ -89,9 +95,12 @@ mm::basic_vec<T, d>::basic_vec(const std::initializer_list<T> l) {
 template<typename T, std::size_t d>
 template<std::size_t n>
 mm::basic_vec<T, d>::basic_vec(const mm::basic_vec<T, n>& other) {
-    // construct with empty values
-    basic_vec();
-    // uses operator=
+    *this = other;
+}
+
+template<typename T, std::size_t d>
+template<std::size_t n>
+mm::basic_vec<T, d>::basic_vec(basic_vec<T, n>&& other) {
     *this = other;
 }
 
@@ -119,6 +128,19 @@ mm::basic_vec<T, d>& mm::basic_vec<T, d>::operator=(const mm::basic_vec<T, n>& o
 
     return *this;
 }
+
+template<typename T, std::size_t d>
+template<std::size_t n>
+mm::basic_vec<T, d>& mm::basic_vec<T, d>::operator=(mm::basic_vec<T, n>&& other) {
+    static_assert(
+        d >= n, "cannot move a higher dimensional vector into a smaller one"
+    );
+
+    std::move(other.begin(), other.end(), this->begin());
+
+    return *this;
+}
+
 
 template<typename T, std::size_t d>
 template<std::size_t n>
