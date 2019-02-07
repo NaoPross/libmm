@@ -1,4 +1,4 @@
-includes = -I include
+includes = -I include/mm
 cflags = -Wall -Werror -pedantic -fPIC -std=c++17 $includes
 
 libs = 
