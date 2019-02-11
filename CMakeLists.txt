@@ -11,10 +11,10 @@ list(INSERT CMAKE_MODULE_PATH 0 ${CMAKE_SOURCE_DIR}/cmake)
 ############################
 # build libmm
 add_library(mm STATIC
-    mmvec.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/mmvec.cpp
 )
 
-add_library(MM:mm ALIAS mm)
+add_library(MM::mm ALIAS mm)
 
 # set up headers
 target_include_directories(mm
@@ -64,19 +64,14 @@ install(TARGETS mm
 set_target_properties(mm PROPERTIES EXPORT_NAME MM)
 
 
-if ("${CMAKE_SYSTEM}" MATCHES "Linux")
-
-# too bad but no other simpler choise
-file(GLOB INCLUDE_FILES "${CMAKE_CURRENT_SOURCE_DIR}/include/*")
-
 # install public headers
-install(FILES ${INCLUDE_FILES}
-        DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/mm
+install(
+    FILES 
+        ${CMAKE_CURRENT_SOURCE_DIR}/include/mmvec.hpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/include/mm
+    DESTINATION
+        ${CMAKE_INSTALL_INCLUDEDIR}/mm
 )
-
-endif()
-        
-# TODO, install setup for windows too
 
 # export targets
 install(EXPORT mm-targets
