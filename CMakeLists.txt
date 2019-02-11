@@ -63,8 +63,20 @@ install(TARGETS mm
 
 set_target_properties(mm PROPERTIES EXPORT_NAME MM)
 
+
+if ("${CMAKE_SYSTEM}" MATCHES "Linux")
+
+# too bad but no other simpler choise
+file(GLOB INCLUDE_FILES "${CMAKE_CURRENT_SOURCE_DIR}/include/*")
+
 # install public headers
-install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/include DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
+install(FILES ${INCLUDE_FILES}
+        DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/mm
+)
+
+endif()
+        
+# TODO, install setup for windows too
 
 # export targets
 install(EXPORT mm-targets
