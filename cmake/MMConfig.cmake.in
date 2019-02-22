@@ -1,0 +1,13 @@
+get_filename_component(MM_CMAKE_DIR "${CMAKE_CURRENT_LIST_FILE}" PATH)
+include(CMakeFindDependencyMacro)
+
+list(APPEND CMAKE_MODULE_PATH ${MM_CMAKE_DIR})
+# add dependencies if needed
+# add_dependency()
+list(REMOVE_AT CMAKE_MODULE_PATH -1)
+
+if (NOT TARGET MM::MM)
+    include("${MM_CMAKE_DIR}/MMTargets.cmake")
+endif()
+
+set(MM_LIBRARIES MM::MM)
