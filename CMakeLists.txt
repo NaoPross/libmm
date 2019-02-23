@@ -113,3 +113,7 @@ export(EXPORT mm-targets
 )
 
 export(PACKAGE MM)
+
+############################
+# tests
+add_subdirectory(test)

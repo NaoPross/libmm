@@ -318,7 +318,7 @@ T mm::vec2<T>::angle() const {
 
 template<typename T>
 mm::vec2<T> mm::vec2<T>::polar() const {
-    return mm::vec2 {
+    return {
         this->length(),
         this->angle()
     };
