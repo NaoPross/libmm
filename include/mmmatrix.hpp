@@ -11,8 +11,7 @@
  */
 #pragma once
 
-#include <cmath>
-#include <array>
+#include <iostream>
 
 namespace mm {
     template<typename T, std::size_t Rows, std::size_t Cols>
@@ -190,4 +189,17 @@ mm::basic_matrix<T, Rows, Cols> operator-(
     const mm::basic_matrix<T, Rows, Cols>& b
 ) {
     return a + static_cast<T>(-1) * b;
+}
+
+template<typename T, std::size_t Rows, std::size_t Cols>
+std::ostream& operator<<(std::ostream& os, const mm::basic_matrix<T, Rows, Cols>& m) {
+    for (int row = 0; row < Rows; row++) {
+        os << "[ ";
+        for (int col = 0; col < (Cols -1); col++) {
+            os << m.at(row, col);
+        }
+        os << m.at(Rows -1, Cols -1) << " ]\n";
+    }
+
+    return os;
 }
