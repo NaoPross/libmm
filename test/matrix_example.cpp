@@ -12,6 +12,10 @@ int main(int argc, char *argv[]) {
     std::cout << "a = \n" << a;
     std::cout << "b = \n" << b;
     std::cout << "c = \n" << c;
+
+    // access elements
+    std::cout << "a.at(2,0) = " << a.at(2, 0) << std::endl;
+    std::cout << "a[2][0]   = " << a[2][0] << std::endl;;
     
     // basic operations
     std::cout << "a + b = \n" << a + b;
