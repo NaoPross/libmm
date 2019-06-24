@@ -222,10 +222,7 @@ std::ostream& operator<<(std::ostream& os, const mm::basic_vec<T, d>& v) {
 template<typename T, std::size_t d>
 class mm::vec: public mm::basic_vec<T, d> {
 public:
-    vec(std::initializer_list<T> l) : basic_vec<T, d>(l) {}
-
-    template<std::size_t n>
-    vec(const basic_vec<T, n>& other) : basic_vec<T, d>(other) {}
+    using mm::basic_vec<T, d>::basic_vec;
 };
 
 
@@ -235,11 +232,7 @@ public:
 template<typename T>
 class mm::vec3 : public mm::basic_vec<T, 3> {
 public:
-    vec3() : basic_vec<T, 3>() {}
-    vec3(std::initializer_list<T> l) : basic_vec<T, 3>(l) {}
-
-    template<std::size_t n>
-    vec3(const basic_vec<T, n>& other) : basic_vec<T, 3>(other) {}
+    using mm::basic_vec<T, 3>::basic_vec;
 
     T& x() { return this->at(0); }
     T& y() { return this->at(1); }
@@ -293,11 +286,7 @@ mm::vec3<T> mm::vec3<T>::cross(const vec3<T>& rhs, const vec3<T>& lhs) {
 template<typename T>
 class mm::vec2: public mm::basic_vec<T, 2> {
 public:
-    vec2() : basic_vec<T, 2>() {}
-    vec2(std::initializer_list<T> l) : basic_vec<T, 2>(l) {}
-
-    template<std::size_t n>
-    vec2(const basic_vec<T, n>& other) : basic_vec<T, 2>(other) {}
+    using mm::basic_vec<T, 2>::basic_vec;
 
     T& x() { return this->at(0); }
     T& y() { return this->at(1); }

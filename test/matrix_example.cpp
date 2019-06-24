@@ -1,4 +1,4 @@
-#include "mmmatrix.hpp"
+#include "mm/mmmatrix.hpp"
 
 #include <iostream>
 #include <complex>

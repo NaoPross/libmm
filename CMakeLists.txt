@@ -68,8 +68,8 @@ set_target_properties(mm PROPERTIES EXPORT_NAME MM)
 # install public headers
 install(
     FILES 
-        ${CMAKE_CURRENT_SOURCE_DIR}/include/mmvec.hpp
-        ${CMAKE_CURRENT_SOURCE_DIR}/include/mm
+        ${CMAKE_CURRENT_SOURCE_DIR}/include/mm/mmvec.hpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/include/mm/mm.hpp
     DESTINATION
         ${CMAKE_INSTALL_INCLUDEDIR}/mm
 )
