@@ -574,7 +574,7 @@ T& mm::vector_iterator<T, Rows, Cols, IterType, Grid>::operator*() const
     else if constexpr (IterType == MM_COL_ITER)
         return M.data[index * Cols + position];
     else if constexpr (IterType == MM_DIAG_ITER)
-        return (k > 0) ?
+        return (position > 0) ?
             M.data[(index + position) * Cols + index] :
             M.data[index * Cols + (index - position)];
 }
@@ -587,7 +587,7 @@ T& mm::vector_iterator<T, Rows, Cols, IterType, Grid>::operator[](std::size_t i)
     else if constexpr (IterType == MM_COL_ITER)
         return M.data[i * Cols + position];
     else if constexpr (IterType == MM_DIAG_ITER)
-        return (k > 0) ?
+        return (position > 0) ?
             M.data[(i + position) * Cols + i] :
             M.data[i * Cols + (i - position)];
 }
