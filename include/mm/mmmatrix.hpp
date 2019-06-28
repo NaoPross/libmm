@@ -23,9 +23,8 @@ namespace mm {
     template<typename T, std::size_t Rows, std::size_t Cols>
     class basic_matrix;
 
-    // TODO, not sure it's a good idea
-    //template<typename T, std::size_t Rows, std::size_t Cols>
-    //class transposed_matrix;
+    template<typename T, std::size_t Rows, std::size_t Cols>
+    class transposed_matrix;
 
     /* specialization of basic_matrx for Cols = 1 */
     template<typename T, std::size_t Rows>
@@ -43,246 +42,112 @@ namespace mm {
     template<typename T, std::size_t N>
     class square_matrix;
 
-    template<typename T, std::size_t N>
+    template<typename T, std::size_t N, int K = 0>
     class diagonal_matrix;
 
     /* 
      * Iterators 
      */
 
-    template<typename T, std::size_t Rows, std::size_t Cols>
+    /*
+     * Most abstract type of iterator
+     * IterType = Row, Col, Diag
+     * Grid = constness of mm::basic_matrix
+     */
+    template<typename T, std::size_t Rows, std::size_t Cols, int IterType, template <typename, std::size_t, std::size_t> class Grid>
     class vector_iterator;
-
-    template<typename T, std::size_t N>
-    class diag_iterator;
-
-    template<typename T, std::size_t Rows, std::size_t Cols>
-    class const_vector_iterator;
-
-    template<typename T, std::size_t N>
-    class const_diag_iterator;
 }
 
-/* Non-const Iterators */
+#define MM_ROW_ITER 0
+#define MM_COL_ITER 1
+#define MM_DIAG_ITER 2
 
-template<typename T, std::size_t Rows, std::size_t Cols>
+template<typename T, std::size_t Rows, std::size_t Cols, int IterType, template <typename, std::size_t, std::size_t> class Grid>
 class mm::vector_iterator
 {
     std::size_t index; // variable index
 
-    mm::basic_matrix<T, Rows, Cols>& M;
+    Grid<T, Rows, Cols>& M;
 
-    const std::size_t position; // fixed index
-    const bool direction; // true = row, false = column
+    const int position; // fixed index, negative too for diagonal iterator
 
 public:
-    template<typename U, std::size_t ORows, std::size_t OCols>
+    template<typename U, std::size_t ORows, std::size_t OCols, class OIterType, template <typename, std::size_t, std::size_t> class OGrid>
     friend class vector_iterator;
 
-    vector_iterator(mm::basic_matrix<T, Rows, Cols>& M, std::size_t position, bool direction);
+    vector_iterator(Grid<T, Rows, Cols>& M, int position, std::size_t index = 0);
 
-    mm::vector_iterator<T, Rows, Cols> operator++()
+    mm::vector_iterator<T, Rows, Cols, IterType, Grid> operator++()
     {
-        vector_iterator<T, Rows, Cols> it = *this;
+        vector_iterator<T, Rows, Cols, IterType, Grid> it = *this;
         ++index;
         return it;
     }
 
-    mm::vector_iterator<T, Rows, Cols> operator--()
+    mm::vector_iterator<T, Rows, Cols, IterType, Grid> operator--()
     {
-        vector_iterator<T, Rows, Cols> it = *this;
+        vector_iterator<T, Rows, Cols, IterType, Grid> it = *this;
         --index;
         return it;
     }
 
-    mm::vector_iterator<T, Rows, Cols>& operator++(int)
+    mm::vector_iterator<T, Rows, Cols, IterType, Grid>& operator++(int)
     {
         ++index;
         return *this;
     }
 
-    mm::vector_iterator<T, Rows, Cols>& operator--(int)
+    mm::vector_iterator<T, Rows, Cols, IterType, Grid>& operator--(int)
     {
         --index;
         return *this;
     }
 
-    bool operator==(const mm::vector_iterator<T, Rows, Cols>& other) const
+    bool operator==(const mm::vector_iterator<T, Rows, Cols, IterType, Grid>& other) const
     {
         return index == other.index;
     }
 
-    bool operator=!(const mm::vector_iterator<T, Rows, Cols>& other) const
+    bool operator!=(const mm::vector_iterator<T, Rows, Cols, IterType, Grid>& other) const
     {
         return index != other.index;
+    }
+
+    bool ok() const
+    {
+        if constexpr(IterType == MM_ROW_ITER)
+            return index < Cols;
+        else 
+            return index < Rows;
     }
 
     T& operator*() const;
     T& operator[](std::size_t);
 };
 
-template<typename T, std::size_t N>
-class diag_iterator
-{
-    std::size_t index; // variable index
+/* Row Iterators */
 
-    mm::square_matrix<T, N>& M;
+namespace mm {
 
-    const int position; // fixed diagonal index
+    template<typename T, std::size_t Rows, std::size_t Cols>
+    using row_iterator = vector_iterator<T, Rows, Cols, MM_ROW_ITER, mm::basic_matrix>;
 
-public:
-    template<typename U, std::size_t ON>
-    friend class diag_iterator;
+    template<typename T, std::size_t Rows, std::size_t Cols>
+    using col_iterator = vector_iterator<T, Rows, Cols, MM_COL_ITER, mm::basic_matrix>;
 
-    diag_iterator(mm::square_matrix<T, N>& M, std::size_t position, bool direction);
+    template<typename T, std::size_t Rows, std::size_t Cols>
+    using const_row_iterator = vector_iterator<T, Rows, Cols, MM_ROW_ITER, const mm::basic_matrix>;
 
-    mm::diag_iterator<T, N> operator++()
-    {
-        diag_iterator<T, N> it = *this;
-        ++index;
-        return it;
-    }
+    template<typename T, std::size_t Rows, std::size_t Cols>
+    using const_col_iterator = vector_iterator<T, Rows, Cols, MM_COL_ITER, const mm::basic_matrix>;
 
-    mm::diag_iterator<T, N> operator--()
-    {
-        diag_iterator<T, N> it = *this;
-        --index;
-        return it;
-    }
+    template<typename T, std::size_t N>
+    using diag_iterator = vector_iterator<T, N, N, MM_DIAG_ITER, mm::basic_matrix>;
 
-    mm::diag_iterator<T, N>& operator++(int)
-    {
-        ++index;
-        return *this;
-    }
+    template<typename T, std::size_t N>
+    using const_diag_iterator = vector_iterator<T, N, N, MM_DIAG_ITER, const mm::basic_matrix>;
+}
 
-    mm::diag_iterator<T, N>& operator--(int)
-    {
-        --index;
-        return *this;
-    }
-
-    bool operator==(const mm::diag_iterator<T, N>& other) const
-    {
-        return index == other.index;
-    }
-
-    bool operator=!(const mm::diag_iterator<T, N>& other) const
-    {
-        return index != other.index;
-    }
-
-    T& operator*() const;
-};
-
-/* Const Iterators */
-
-template<typename T, std::size_t Rows, std::size_t Cols>
-class mm::const_vector_iterator
-{
-    std::size_t index; // variable index
-
-    const mm::basic_matrix<T, Rows, Cols>& M;
-
-    const std::size_t position; // fixed index
-    const bool direction; // true = row, false = column
-
-public:
-    const_vector_iterator(mm::basic_matrix<T, Rows, Cols>& M, std::size_t position, bool direction);
-
-    mm::const_vector_iterator<T, Rows, Cols> operator++()
-    {
-        vector_iterator<T, Rows, Cols> it = *this;
-        ++index;
-        return it;
-    }
-
-    mm::const_vector_iterator<T, Rows, Cols> operator--()
-    {
-        vector_iterator<T, Rows, Cols> it = *this;
-        --index;
-        return it;
-    }
-
-    mm::const_vector_iterator<T, Rows, Cols>& operator++(int)
-    {
-        ++index;
-        return *this;
-    }
-
-    mm::const_vector_iterator<T, Rows, Cols>& operator--(int)
-    {
-        --index;
-        return *this;
-    }
-
-    bool operator==(const mm::const_vector_iterator<T, Rows, Cols>& other) const
-    {
-        return index == other;
-    }
-
-    bool operator=!(const mm::const_vector_iterator<T, Rows, Cols>& other) const
-    {
-        return index != other;
-    }
-
-    const T& operator*() const;
-    const T& operator[](std::size_t) const;
-};
-
-template<typename T>
-class const_diag_iterator
-{
-    std::size_t index; // variable index
-
-    const mm::square_matrix<T, N>& M;
-
-    const int position; // fixed diagonal index
-
-public:
-    template<typename U, std::size_t ON>
-    friend class const_diag_iterator;
-
-    const_diag_iterator(const mm::square_matrix<T, N>& M, std::size_t position, bool direction);
-
-    mm::const_diag_iterator<T, N> operator++()
-    {
-        const_diag_iterator<T, N> it = *this;
-        ++index;
-        return it;
-    }
-
-    mm::const_diag_iterator<T, N> operator--()
-    {
-        const_diag_iterator<T, N> it = *this;
-        --index;
-        return it;
-    }
-
-    mm::const_diag_iterator<T, N>& operator++(int)
-    {
-        ++index;
-        return *this;
-    }
-
-    mm::const_diag_iterator<T, N>& operator--(int)
-    {
-        --index;
-        return *this;
-    }
-
-    bool operator==(const mm::const_diag_iterator<T, N>& other) const
-    {
-        return index == other.index;
-    }
-
-    bool operator=!(const mm::const_diag_iterator<T, N>& other) const
-    {
-        return index != other.index;
-    }
-
-    const T& operator*() const;
-};
 
 /*
  * Matrix class
@@ -315,20 +180,25 @@ public:
     template<std::size_t ORows, std::size_t OCols>
     basic_matrix(const basic_matrix<T, ORows, OCols>& other);
 
-    // access data
+    // access data, basic definition
     virtual T& at(std::size_t row, std::size_t col);
     virtual const T& at(std::size_t row, std::size_t col) const;
 
     // allows to access a matrix M at row j col k with M[j][k]
-    virtual auto operator[](std::size_t index);
+    auto operator[](std::size_t index);
+
+    virtual auto row_begin(std::size_t index)
+    {
+        return mm::row_iterator<T, Rows, Cols>(*this, static_cast<int>(index));
+    }
 
     void swap_rows(std::size_t x, std::size_t y);
     void swap_cols(std::size_t x, std::size_t y);
 
     // mathematical operations
     // TODO, simply switch iteration mode
-    virtual basic_matrix<T, Cols, Rows> transposed() const;
-    inline basic_matrix<T, Cols, Rows> td() const { return transposed(); }
+    //virtual basic_matrix<T, Cols, Rows> transposed() const;
+    //inline basic_matrix<T, Cols, Rows> td() const { return transposed(); }
 
 
     /// downcast to square matrix
@@ -441,12 +311,15 @@ auto mm::basic_matrix<T, Rows, Cols>::operator[](std::size_t index) {
     if constexpr (is_row_vec() || is_col_vec()) {
         return data.at(index);
     } else {
-        return row_vec<T, Rows>(
+        return row_begin(index);
+
+        /*return row_vec<T, Rows>(
             data.cbegin() + (index * Cols),
             data.cbegin() + ((index + 1) * Cols) + 1
-        );
+        );*/
     }
 }
+
 
 template<typename T, std::size_t Rows, std::size_t Cols>
 void mm::basic_matrix<T, Rows, Cols>::swap_rows(std::size_t x, std::size_t y) {
@@ -466,7 +339,7 @@ void mm::basic_matrix<T, Rows, Cols>::swap_cols(std::size_t x, std::size_t y) {
         std::swap(this->at(row, x), this->at(row, y));
 }
 
-template<typename T, std::size_t M, std::size_t N>
+/*template<typename T, std::size_t M, std::size_t N>
 mm::basic_matrix<T, N, M> mm::basic_matrix<T, M, N>::transposed() const {
     mm::basic_matrix<T, N, M> result;
 
@@ -475,7 +348,7 @@ mm::basic_matrix<T, N, M> mm::basic_matrix<T, M, N>::transposed() const {
             result.at(col, row) = this->at(row, col);
 
     return result;
-}
+}*/
 
 
 /* operator overloading */
@@ -582,7 +455,6 @@ public:
 
 /* 
  * transposed matrix format 
- * TODO: write this class, or put a bool flag into the original one
  */
 
 template<typename T, std::size_t Rows, std::size_t Cols>
@@ -602,11 +474,11 @@ public:
     }
 
     // allows to access a matrix M at row j col k with M[j][k]
-    virtual auto operator[](std::size_t index) override
+    virtual auto row_begin(std::size_t index) override
     {
-        // TODO, return other direction iterator
+        return mm::col_iterator<T, Rows, Cols>(*this, static_cast<int>(index));
     }
-}
+};
 
 /* square matrix specialization */
 template<typename T, std::size_t N>
@@ -615,8 +487,8 @@ public:
     using mm::basic_matrix<T, N, N>::basic_matrix;
 
     /// in place transpose
-    void transpose();  
-    inline void t() { transpose(); }
+    //void transpose();  
+    //inline void t() { transpose(); }
 
     T trace();
     inline T tr() { return trace(); }
@@ -628,13 +500,13 @@ public:
 
 
     // TODO, downcast to K-diagonal, user defined cast
-    template<int K>
+    /*template<int K>
     operator mm::diagonal_matrix<T, N, K>() const
     {
         // it's always possible to do it bidirectionally, 
         // without loosing information
-        return dynamic_cast<mm::diagonal_matrix<T, N, K>>(*this);
-    }
+        return reinterpret_cast<mm::diagonal_matrix<T, N, K>>(*this);
+    }*/
 
     // get the identity of size N
     static inline constexpr square_matrix<T, N> identity() {
@@ -653,7 +525,7 @@ public:
  */
 
 template<typename T, std::size_t N, int K>
-class mm::diagonal_matrix : public mm::square_matrix
+class mm::diagonal_matrix : public mm::square_matrix<T, N>
 {
 public:
     using mm::square_matrix<T, N>::square_matrix;
@@ -662,100 +534,61 @@ public:
     // TODO, matrix multiplication
 };
 
-template<typename T, std::size_t N>
+/*template<typename T, std::size_t N>
 void mm::square_matrix<T, N>::transpose() {
     for (unsigned row = 0; row < N; row++)
         for (unsigned col = 0; col < row; col++)
             std::swap(this->at(row, col), this->at(col, row));
-}
+}*/
 
 template<typename T, std::size_t N>
 T mm::square_matrix<T, N>::trace() {
+
     T sum = 0;
-    for (unsigned i = 0; i < N; i++)
-        sum += this->at(i, i);
+    for (mm::diag_iterator<T, N> it(*this, 0); it.ok(); ++it)
+        sum += *it;
 
     return sum;
 }
 
-/* Iterators implementations */
+/* Iterators implementation */
 
-template<typename T, std::size_t Rows, std::size_t Cols>
-mm::vector_iterator<T, Rows, Cols>::vector_iterator(mm::basic_matrix<T, Rows, Cols>& _M, std::size_t pos, bool dir)
-    index(0), M(_M), position(pos), direction(dir)
+template<typename T, std::size_t Rows, std::size_t Cols, int IterType, template <typename, std::size_t, std::size_t> class Grid>
+mm::vector_iterator<T, Rows, Cols, IterType, Grid>::vector_iterator(Grid<T, Rows, Cols>& _M, int pos, std::size_t i)
+    : index(i), M(_M), position(pos)
 {
-    assert((dir && pos < Cols) || (!dir && pos < Rows))
+    if constexpr (IterType == MM_ROW_ITER) {
+        assert(pos < Cols);
+    } else if constexpr (IterType == MM_COL_ITER) {
+        assert(pos < Rows);
+    } else if constexpr (IterType == MM_DIAG_ITER) {
+        assert(abs(pos) < Rows);
+    }
 }
 
-template<typename T, std::size_t Rows, std::size_t Cols>
-T& mm::vector_iterator<T, Rows, Cols>::operator*() const
+template<typename T, std::size_t Rows, std::size_t Cols, int IterType, template <typename, std::size_t, std::size_t> class Grid>
+T& mm::vector_iterator<T, Rows, Cols, IterType, Grid>::operator*() const
 {
-    return (direction) ?
-            M.data[position * Cols + index] :
-            M.data[index * Cols + position];
+    if constexpr (IterType == MM_ROW_ITER)
+        return M.data[position * Cols + index];
+    else if constexpr (IterType == MM_COL_ITER)
+        return M.data[index * Cols + position];
+    else if constexpr (IterType == MM_DIAG_ITER)
+        return (k > 0) ?
+            M.data[(index + position) * Cols + index] :
+            M.data[index * Cols + (index - position)];
 }
 
-template<typename T, std::size_t Rows, std::size_t Cols>
-T& mm::vector_iterator<T, Rows, Cols>::operator[](std::size_t i)
+template<typename T, std::size_t Rows, std::size_t Cols, int IterType, template <typename, std::size_t, std::size_t> class Grid>
+T& mm::vector_iterator<T, Rows, Cols, IterType, Grid>::operator[](std::size_t i)
 {
-    return (direction) ?
-            M.data[position * Cols + i] :
-            M.data[i * Cols + position];
+    if constexpr (IterType == MM_ROW_ITER)
+        return M.data[position * Cols + i];
+    else if constexpr (IterType == MM_COL_ITER)
+        return M.data[i * Cols + position];
+    else if constexpr (IterType == MM_DIAG_ITER)
+        return (k > 0) ?
+            M.data[(i + position) * Cols + i] :
+            M.data[i * Cols + (i - position)];
 }
-
-template<typename T, std::size_t N>
-mm::diag_iterator<T, N>::diag_iterator(mm::square_matrix<T, N>& _M, int pos)
-    index(0), M(_M), position(pos)
-{
-    assert(abs(pos) < N) // pos bounded between ]-N, N[ 
-}
-
-template<typename T, std::size_t N>
-T& mm::diag_iterator<T, N>::operator*() const
-{
-    return (k > 0) ?
-        M.data[(index + position) * Cols + index] :
-        M.data[index * Cols + (index - position)];
-}
-
-
-template<typename T, std::size_t Rows, std::size_t Cols>
-mm::const_vector_iterator<T, Rows, Cols>::const_vector_iterator(const mm::basic_matrix<T, Rows, Cols>& _M, std::size_t pos, bool dir)
-    index(0), M(_M), position(pos), direction(dir)
-{
-    assert((dir && pos < Cols) || (!dir && pos < Rows))
-}
-
-template<typename T, std::size_t Rows, std::size_t Cols>
-const T& mm::const_vector_iterator<T, Rows, Cols>::operator*() const
-{
-    return (direction) ?
-            M.data[position * Cols + index] :
-            M.data[index * Cols + position];
-}
-
-template<typename T, std::size_t Rows, std::size_t Cols>
-const T& mm::const_vector_iterator<T, Rows, Cols>::operator[](std::size_t i) const
-{
-    return (direction) ?
-            M.data[position * Cols + i] :
-            M.data[i * Cols + position];
-}
-
-template<typename T, std::size_t N>
-mm::const_diag_iterator<T, N>::const_diag_iterator(const mm::square_matrix<T, N>& _M, int pos)
-    index(0), M(_M), position(pos)
-{
-    assert(abs(pos) < N) // pos bounded between ]-N, N[ 
-}
-
-template<typename T, std::size_t N>
-T& mm::const_diag_iterator<T, N>::operator*() const
-{
-    return (k > 0) ?
-        M.data[(index + position) * Cols + index] :
-        M.data[index * Cols + (index - position)];
-}
-
-
 
