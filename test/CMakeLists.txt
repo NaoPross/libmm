@@ -1,3 +1,5 @@
+cmake_minimum_required(VERSION 3.10)
+
 add_executable(vec_example
     vec_example.cpp
 )
@@ -10,6 +12,10 @@ target_compile_options(vec_example
             -Wundef -Wvla -Wconversion -Wstrict-aliasing
         >
         $<$<CXX_COMPILER_ID:MSVC>:/W4>
+)
+
+target_link_libraries(vec_example
+    PRIVATE "$<$<CXX_COMPILER_ID:GNU>:-fsanitize=address -fno-omit-frame-pointer>"
 )
 
 target_compile_features(vec_example
