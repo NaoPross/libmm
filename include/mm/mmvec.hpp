@@ -75,8 +75,13 @@ struct mm::basic_vec : public std::array<T, d> {
 
 
     basic_vec<T, d>& operator*=(const T& scalar);
-};
 
+
+    // conversion operator
+    operator mm::vec<T, d>();
+    operator mm::vec2<T>();
+    operator mm::vec3<T>();
+};
 
 // member functions for basic_vec
 
@@ -160,6 +165,24 @@ template<typename T, std::size_t d>
 mm::basic_vec<T, d>& mm::basic_vec<T, d>::operator*=(const T& scalar) {
     *this = *this * scalar;
     return *this;
+}
+
+
+template<typename T, std::size_t d>
+mm::basic_vec<T, d>::operator mm::vec<T, d>(){
+    return static_cast<mm::vec<T, d>>(*this);
+}
+
+template<typename T, std::size_t d>
+mm::basic_vec<T, d>::operator mm::vec2<T>(){
+    static_assert(d == 2);
+    return static_cast<mm::vec2<T>>(*this);
+}
+
+template<typename T, std::size_t d>
+mm::basic_vec<T, d>::operator mm::vec3<T>(){
+    static_assert(d == 3);
+    return static_cast<mm::vec3<T>>(*this);
 }
 
 
