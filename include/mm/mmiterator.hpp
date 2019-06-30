@@ -1,5 +1,7 @@
 #pragma once
 
+#include "debug.hpp"
+
 namespace mm::iter {
 
     template<typename T, std::size_t Rows, std::size_t Cols, class IterType, class Grid>
@@ -33,14 +35,14 @@ public:
 
     IterType operator++()
     {
-        IterType it = *this;
+        IterType it = cpy();
         ++index;
         return it;
     }
 
     IterType operator--()
     {
-        IterType it = *this;
+        IterType it = cpy();
         --index;
         return it;
     }
@@ -48,13 +50,13 @@ public:
     IterType& operator++(int)
     {
         ++index;
-        return *this;
+        return ref();
     }
 
     IterType& operator--(int)
     {
         --index;
-        return *this;
+        return ref();
     }
 
     bool operator==(const IterType& other) const
@@ -111,6 +113,9 @@ protected:
 
     const std::size_t position; // fixed index, negative too for diagonal iterator
     std::size_t index; // variable index
+
+    virtual IterType& ref() = 0;
+    virtual IterType cpy() = 0;
 };
 
 template<typename T, std::size_t Rows, std::size_t Cols, class Grid>
@@ -118,12 +123,24 @@ class mm::iter::basic_iterator : public mm::iter::vector_iterator<T, Rows, Cols,
 {
     bool direction;
 
+    virtual mm::iter::basic_iterator<T, Rows, Cols, Grid>& ref() override
+    {
+        return *this;
+    }
+
+    virtual mm::iter::basic_iterator<T, Rows, Cols, Grid> cpy() override
+    {
+        return *this;
+    }
+
 public:
 
     basic_iterator(Grid& A, std::size_t pos, std::size_t _index = 0, bool dir = true)
         : mm::iter::vector_iterator<T, Rows, Cols, mm::iter::basic_iterator<T, Rows, Cols, Grid>, Grid>
             (A, pos, _index), direction(dir)
     {
+        //npdebug("Position: ", pos, ", Rows: ", Rows, " Cols: ", Cols, ", Direction: ", dir)
+
         if (direction)
            assert(pos < Rows);
         else
@@ -162,11 +179,21 @@ class mm::iter::diag_iterator : public mm::iter::vector_iterator<T, N, N, mm::it
 {
     bool sign;
 
+    virtual mm::iter::diag_iterator<T, N, Grid>& ref() override
+    {
+        return *this;
+    }
+
+    virtual mm::iter::diag_iterator<T, N, Grid> cpy() override
+    {
+        return *this;
+    }
+
 public:
 
-    diag_iterator(Grid& A, signed long pos, std::size_t _index = 0)
+    diag_iterator(Grid& A, signed long int pos, std::size_t _index = 0)
         : mm::iter::vector_iterator<T, N, N, mm::iter::diag_iterator<T, N, Grid>, Grid>
-            (A, static_cast<std::size_t>(abs(pos)), _index), sign(pos >= 0)
+            (A, static_cast<std::size_t>(labs(pos)), _index), sign(pos >= 0)
     {
         assert(this->position < N);
     }
