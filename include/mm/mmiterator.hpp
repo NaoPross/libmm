@@ -28,10 +28,13 @@ public:
     vector_iterator(Grid& _M, std::size_t pos, std::size_t i = 0)
         : M(_M), position(pos), index(i) {}
 
+#ifdef MM_IMPLICIT_CONVERSION_ITERATOR
     operator T&()
     {
+        npdebug("Calling +")
         return *(*this);
     }
+#endif
 
     IterType operator++()
     {
@@ -69,10 +72,17 @@ public:
         return index != other.index;
     }
 
-    virtual bool ok() const = 0;
+    bool ok() const
+    {
+        return index < size();
+    }
+
+    virtual std::size_t size() const = 0;
     
     virtual T& operator*() = 0;
     virtual T& operator[](std::size_t) = 0;
+
+    virtual T& operator[](std::size_t) const = 0;
 
     IterType begin()
     {
@@ -81,32 +91,6 @@ public:
 
     virtual IterType end() = 0;
     
-    /*
-     * Scalar product 
-     */
-
-    template<std::size_t P>
-    T operator*(const mm::iter::vector_iterator<T, Rows, P, IterType, Grid>& v)
-    {
-        T out(0);
-
-        for (unsigned k(0); k < Rows; ++k)
-            out += (*this)[k] * v[k];
-
-        return out;
-    }
-
-    template<std::size_t P>
-    T operator*(const mm::iter::vector_iterator<T, P, Cols, IterType, Grid>& v)
-    {
-        T out(0);
-
-        for (unsigned k(0); k < Cols; ++k)
-            out += (*this)[k] * v[k];
-
-        return out;
-    }
-
 protected:
 
     Grid& M; // grid mapping
@@ -117,6 +101,28 @@ protected:
     virtual IterType& ref() = 0;
     virtual IterType cpy() = 0;
 };
+
+
+/*
+ * Scalar product 
+ */
+
+template<typename T, 
+    std::size_t R1, std::size_t C1, 
+    std::size_t R2, std::size_t C2, 
+    class IterType1, class IterType2,
+    class Grid1, class Grid2>
+typename std::remove_const<T>::type operator*(const mm::iter::vector_iterator<T, R1, C1, IterType1, Grid1>& v,
+            const mm::iter::vector_iterator<T, R2, C2, IterType2, Grid2>& w)
+{
+    typename std::remove_const<T>::type out(0);
+    const std::size_t N = std::min(v.size(), w.size());
+
+    for(unsigned i = 0; i < N; ++i)
+        out += v[i] * w[i];
+
+    return out;
+}
 
 template<typename T, std::size_t Rows, std::size_t Cols, class Grid>
 class mm::iter::basic_iterator : public mm::iter::vector_iterator<T, Rows, Cols, mm::iter::basic_iterator<T, Rows, Cols, Grid>, Grid>
@@ -147,11 +153,12 @@ public:
            assert(pos < Cols);
     }
 
-    virtual bool ok() const override
+    virtual std::size_t size() const
     {
-        return (direction) ? this->index < Cols : this->index < Rows;
+        return (direction) ? Cols : Rows;
     }
 
+    
     virtual T& operator*() override
     {
         return (direction) ?
@@ -161,6 +168,13 @@ public:
     }
 
     virtual T& operator[](std::size_t i) override
+    {
+        return (direction) ?
+            this->M.data[this->position * Cols + i] :
+            this->M.data[i * Cols + this->position];
+    }
+
+    virtual T& operator[](std::size_t i) const override
     {
         return (direction) ?
             this->M.data[this->position * Cols + i] :
@@ -198,9 +212,9 @@ public:
         assert(this->position < N);
     }
 
-    virtual bool ok() const 
+    virtual std::size_t size() const
     {
-        return this->index < N;
+        return N - this->position;
     }
 
     virtual T& operator*() override
@@ -216,6 +230,14 @@ public:
             this->M.data[(i - this->position) * N + i] :
             this->M.data[i * N + (i + this->position)];
     }
+
+    virtual T& operator[](std::size_t i) const override
+    {
+        return (sign) ?
+            this->M.data[(i - this->position) * N + i] :
+            this->M.data[i * N + (i + this->position)];
+    }
+
 
     virtual mm::iter::diag_iterator<T, N, Grid> end()
     {

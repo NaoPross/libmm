@@ -414,7 +414,9 @@ mm::matrix<T, M, N> operator*(
     assert(a.cols() == b.rows());
 
     mm::matrix<T, M, N> result;
-    mm::matrix<T, P2, N> bt = b.t(); // weak transposition
+    const mm::matrix<T, P2, N> bt = b.t(); // weak transposition
+
+    npdebug("Calling *")
 
     for (unsigned row = 0; row < M; row++)
         for (unsigned col = 0; col < N; col++)
