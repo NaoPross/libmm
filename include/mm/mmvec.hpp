@@ -44,6 +44,27 @@ struct mm::basic_vec : public std::array<T, d> {
     using type = T;
     static constexpr std::size_t dimensions = d;
 
+    // convertions 
+    static inline constexpr bool is_vec2() {
+        return d == 2;
+    }
+
+    static inline constexpr bool is_vec3() {
+        return d == 3;
+    }
+
+    operator mm::vec2<T>()
+    {
+        static_assert(is_vec2(), "Invalid cast to two dimensional vector");
+        return static_cast<mm::vec2<T>>(*this);
+    }
+
+    operator mm::vec3<T>()
+    {
+        static_assert(is_vec3(), "Invalid cast to three dimensional vector");
+        return static_cast<mm::vec3<T>>(*this);
+    }
+
     // TODO: template away these
     static constexpr T null_element = static_cast<T>(0);
     static constexpr T unit_element = static_cast<T>(1);

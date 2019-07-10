@@ -28,13 +28,13 @@ public:
     vector_iterator(Grid& _M, std::size_t pos, std::size_t i = 0)
         : M(_M), position(pos), index(i) {}
 
-#ifdef MM_IMPLICIT_CONVERSION_ITERATOR
+//#ifdef MM_IMPLICIT_CONVERSION_ITERATOR
     operator T&()
     {
-        npdebug("Calling +")
+        //npdebug("Calling +")
         return *(*this);
     }
-#endif
+//#endif
 
     IterType operator++()
     {

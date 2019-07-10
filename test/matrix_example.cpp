@@ -32,7 +32,7 @@ int main(int argc, char *argv[]) {
     std::cout << "a.td() = \n" << a.t(); // or a.trasposed();
     std::cout << std::endl;
 
-    // special matrices
+    // square matrix
     mm::square_matrix<std::complex<int>, 2> f {{{2, 3}, {1, 4}}, {{6, 1}, {-3, 4}}};
 
     std::cout << "Square matrix" << std::endl;
@@ -49,6 +49,10 @@ int main(int argc, char *argv[]) {
     std::cout << "Identity matrix" << std::endl;
     std::cout << "I = \n" << identity;
     std::cout << std::endl; 
+
+    // vector
+    
+    // 
 
 	return 0;
 }
