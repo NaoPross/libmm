@@ -32,27 +32,5 @@ int main(int argc, char *argv[]) {
     std::cout << "a.td() = \n" << a.t(); // or a.trasposed();
     std::cout << std::endl;
 
-    // square matrix
-    mm::square_matrix<std::complex<int>, 2> f {{{2, 3}, {1, 4}}, {{6, 1}, {-3, 4}}};
-
-    std::cout << "Square matrix" << std::endl;
-    std::cout << "f = \n" << f;
-
-    std::cout << "tr(f) = " << f.tr();  //or f.trace()  << std::endl;
-
-    auto ft = f.t();
-    std::cout << "after in place transpose f.t(), f = \n" << ft; 
-    std::cout << std::endl;
-
-    auto identity = mm::square_matrix<int, 3>::identity();
-
-    std::cout << "Identity matrix" << std::endl;
-    std::cout << "I = \n" << identity;
-    std::cout << std::endl; 
-
-    // vector
-    
-    // 
-
 	return 0;
 }
