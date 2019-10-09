@@ -11,7 +11,9 @@
  */
 #pragma once
 
+#ifndef NDEBUG
 #include "mm/debug.hpp"
+#endif
 
 #include <iostream>
 #include <iomanip>
