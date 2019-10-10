@@ -44,27 +44,6 @@ struct mm::basic_vec : public std::array<T, d> {
     using type = T;
     static constexpr std::size_t dimensions = d;
 
-    // convertions 
-    static inline constexpr bool is_vec2() {
-        return d == 2;
-    }
-
-    static inline constexpr bool is_vec3() {
-        return d == 3;
-    }
-
-    operator mm::vec2<T>()
-    {
-        static_assert(is_vec2(), "Invalid cast to two dimensional vector");
-        return static_cast<mm::vec2<T>>(*this);
-    }
-
-    operator mm::vec3<T>()
-    {
-        static_assert(is_vec3(), "Invalid cast to three dimensional vector");
-        return static_cast<mm::vec3<T>>(*this);
-    }
-
     // TODO: template away these
     static constexpr T null_element = static_cast<T>(0);
     static constexpr T unit_element = static_cast<T>(1);
@@ -96,8 +75,15 @@ struct mm::basic_vec : public std::array<T, d> {
 
 
     basic_vec<T, d>& operator*=(const T& scalar);
-};
 
+    // conversion operator
+    static inline constexpr bool is_vec2() { return d == 2; }
+    static inline constexpr bool is_vec3() { return d == 3; }
+
+    operator mm::vec<T, d>();
+    operator mm::vec2<T>();
+    operator mm::vec3<T>();
+};
 
 // member functions for basic_vec
 
@@ -135,6 +121,58 @@ T mm::basic_vec<T, d>::length() const {
     ));
 }
 
+// operator overloads for basic_vec
+
+template<typename T, std::size_t d>
+mm::basic_vec<T, d> operator+(const mm::basic_vec<T, d>& rhs, const mm::basic_vec<T, d>& lhs) {
+    mm::basic_vec<T, d> out;
+    
+    std::transform(rhs.begin(), rhs.end(), lhs.begin(), out.begin(),
+        [](const T& r, const T& l) -> T {
+            return r + l;
+        }
+    );
+
+    return out;
+}
+
+template<typename T, std::size_t d>
+mm::basic_vec<T, d> operator*(const T& rhs, const mm::basic_vec<T, d>& lhs) {
+    mm::basic_vec<T, d> out;
+
+    std::transform(lhs.begin(), lhs.end(), out.begin(), 
+        [rhs](const T& t) -> T {
+            return t * rhs;
+    });
+
+    return out;
+}
+
+template<typename T, std::size_t d>
+mm::basic_vec<T, d> operator*(const mm::basic_vec<T, d>& rhs, const T& lhs) {
+    return lhs * rhs;
+}
+
+template<typename T, std::size_t d>
+mm::basic_vec<T, d> operator-(const mm::basic_vec<T, d>& rhs, const mm::basic_vec<T, d>& lhs) {
+    return rhs + mm::basic_vec<T, d>::unit_additive_inverse_element * lhs;
+}
+
+template<typename T, std::size_t d>
+T operator*(const mm::basic_vec<T, d>& rhs, const mm::basic_vec<T, d>& lhs) {
+    return std::inner_product(rhs.begin(), rhs.end(), lhs.begin(), 0);
+}
+
+template<typename T, std::size_t d>
+std::ostream& operator<<(std::ostream& os, const mm::basic_vec<T, d>& v) {
+    os << "<";
+    std::for_each(v.begin(), v.end() -1, [&](const T& el) {
+        os << el << ", ";
+    });
+    os << v.back() << ">";
+
+    return os;
+}
 
 // memeber operator overloads for basic_vec
 
@@ -184,57 +222,21 @@ mm::basic_vec<T, d>& mm::basic_vec<T, d>::operator*=(const T& scalar) {
 }
 
 
-// operator overloads for basic_vec
-
 template<typename T, std::size_t d>
-mm::basic_vec<T, d> operator+(const mm::basic_vec<T, d>& rhs, const mm::basic_vec<T, d>& lhs) {
-    mm::basic_vec<T, d> out;
-    
-    std::transform(rhs.begin(), rhs.end(), lhs.begin(), out.begin(),
-        [](const T& r, const T& l) -> T {
-            return r + l;
-        }
-    );
-
-    return out;
+mm::basic_vec<T, d>::operator mm::vec<T, d>(){
+    return static_cast<mm::vec<T, d>>(*this);
 }
 
 template<typename T, std::size_t d>
-mm::basic_vec<T, d> operator*(const mm::basic_vec<T, d>& rhs, const T& lhs) {
-    return lhs * rhs;
+mm::basic_vec<T, d>::operator mm::vec2<T>(){
+    static_assert(d == 2);
+    return static_cast<mm::vec2<T>>(*this);
 }
 
 template<typename T, std::size_t d>
-mm::basic_vec<T, d> operator*(const T& rhs, const mm::basic_vec<T, d>& lhs) {
-    mm::basic_vec<T, d> out;
-
-    std::transform(lhs.begin(), lhs.end(), out.begin(), 
-        [rhs](const T& t) -> T {
-            return t * rhs;
-    });
-
-    return out;
-}
-
-template<typename T, std::size_t d>
-mm::basic_vec<T, d> operator-(const mm::basic_vec<T, d>& rhs, const mm::basic_vec<T, d>& lhs) {
-    return rhs + mm::basic_vec<T, d>::unit_additive_inverse_element * lhs;
-}
-
-template<typename T, std::size_t d>
-T operator*(const mm::basic_vec<T, d>& rhs, const mm::basic_vec<T, d>& lhs) {
-    return std::inner_product(rhs.begin(), rhs.end(), lhs.begin(), 0);
-}
-
-template<typename T, std::size_t d>
-std::ostream& operator<<(std::ostream& os, const mm::basic_vec<T, d>& v) {
-    os << "<";
-    std::for_each(v.begin(), v.end() -1, [&](const T& el) {
-        os << el << ", ";
-    });
-    os << v.back() << ">";
-
-    return os;
+mm::basic_vec<T, d>::operator mm::vec3<T>(){
+    static_assert(d == 3);
+    return static_cast<mm::vec3<T>>(*this);
 }
 
 

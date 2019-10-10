@@ -13,6 +13,10 @@ target_compile_options(vec_example
         $<$<CXX_COMPILER_ID:MSVC>:/W4>
 )
 
+target_link_libraries(vec_example
+    PRIVATE "$<$<CXX_COMPILER_ID:GNU>:-fsanitize=address -fno-omit-frame-pointer>"
+)
+
 target_compile_features(vec_example
     PRIVATE
         cxx_std_17
