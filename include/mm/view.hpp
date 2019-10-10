@@ -1,45 +1,13 @@
 #pragma once
 
 #include "mm/mmmatrix.hpp"
+#include "mm/algorithm.hpp"
 
-#include <variant>
 #include <tuple>
 #include <type_traits>
-#include <functional>
 
 
 namespace mm {
-    namespace algorithm {
-        // does nothing
-        struct visit
-        {
-            visit() = default;
-
-            template<typename Matrix>
-            void operator()(Matrix& m) {}
-        };
-
-        struct transpose : public visit
-        {
-            /// does not work with non-square matrices
-            template<typename Matrix>
-            void operator()(Matrix& m) {
-                static_assert(Matrix::rows == Matrix::cols);
-                // naiive impl
-                for (index r = 0; r < m.rows / 2; r++)
-                    for (index c = 0; c < m.cols; c++)
-                        if (c != r)
-                            std::swap(m.at(r, c), m.at(c, r));
-            }
-        };
-
-        /// algorithm aliases
-        using tr = transpose;
-    }
-
-    /// namespace alias
-    namespace alg = algorithm;
-
     template<typename Matrix>
     struct clone
     {
@@ -86,7 +54,6 @@ namespace mm {
 
     template<typename Matrix, typename Alg>
     clone<Matrix> operator|(clone<Matrix>&& cl, Alg&& v) {
-        static_assert(std::is_convertible<Alg, alg::visit>::value);
         /// apply alg operator
         v(cl.matrix);
         /// forward to next alg
@@ -95,7 +62,6 @@ namespace mm {
 
     template<typename Matrix, typename ...Algs, typename Alg>
     mutate<Matrix, Algs..., Alg> operator|(mutate<Matrix, Algs...>&& mut, Alg&& v) {
-        static_assert(std::is_convertible<Alg, alg::visit>::value);
         /// append alg to the visitors tuple
         return mutate<Matrix, Algs..., Alg>(
             mut.matrix,
