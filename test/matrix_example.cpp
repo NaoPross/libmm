@@ -1,6 +1,8 @@
 #include "mm/mmmatrix.hpp"
 #include "mm/view.hpp"
 
+#include "mm/fast/mmmatrix.hpp"
+
 #include <iostream>
 #include <complex>
 
@@ -40,17 +42,17 @@ int main() {
     std::cout << "a = \n" << a;
 
     std::cout << "Cloning a" << std::endl;
-    decltype(a) e = mm::clone(a) | mm::alg::transpose();
+    decltype(a) e = mm::clone(a) | mm::alg::transpose;
     std::cout << "e = \n" << e;
     std::cout << std::endl;
 
     std::cout << "Mutating a" << std::endl;
-    mm::mutate(a) | mm::alg::transpose();
+    mm::mutate(a) | mm::alg::transpose;
     std::cout << "a = \n" << a;
     std::cout << std::endl;
 
-    a | mm::alg::tr();
-    std::cout << "a = \n" << a;
+    decltype(a) b = a | mm::alg::rref;
+    std::cout << b;
 
     // std::cout << "Converting clone object" << std::endl;
     // mm::matrix<int, 2, 2> g = e;

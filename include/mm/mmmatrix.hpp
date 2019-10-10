@@ -60,29 +60,6 @@ namespace mm {
         static constexpr std::size_t rows = Rows;
         static constexpr std::size_t cols = Cols;
 
-
-        template<typename U, std::size_t ORows, std::size_t OCols>
-        friend class mm::basic_matrix;
-
-        virtual ~basic_matrix() {};
-
-        // copy from another matrix
-        // template<std::std::size_t ORows, std::size_t OCols>
-        // basic_matrix(const basic_matrix<T, ORows, OCols>& other) {
-        //     static_assert(ORows <= Rows);
-        //     static_assert(OCols <= Cols);
-
-        //     for (index row = 0; row < Rows; row++)
-        //         for (index col = 0; col < Cols; col++)
-        //             at(row, col) = other.at(row, col);
-        // }
-
-        virtual T& at(index row, index col) = 0;
-        virtual const T& at(index row, index col) const  = 0;
-
-        // constexpr std::size_t rows() { return Rows; }
-        // constexpr std::size_t cols() { return Cols; }
-
     protected:
         basic_matrix() {
             npdebug("default construtor");
@@ -121,11 +98,11 @@ namespace mm {
 
         virtual ~matrix() = default;
 
-        virtual T& at(index row, index col) override {
+        virtual T& at(index row, index col) {
             return m_data[row * Cols + col];
         }
 
-        virtual const T& at(index row, index col) const override {
+        virtual const T& at(index row, index col) const {
             return m_data[row * Cols + col];
         }
 
@@ -135,7 +112,12 @@ namespace mm {
 
 
     template<typename T, std::size_t N>
-    struct vector : public matrix<T, 1, N> {};
+    struct vector : public matrix<T, 1, N>
+    {
+        T& at(index i) {
+            return at(1, i);
+        }
+    };
 
     template<typename T, std::size_t N>
     struct square_matrix : public matrix<T, N, N>
@@ -145,7 +127,7 @@ namespace mm {
     struct identity_matrix : public basic_matrix<T, N, N>
     {
     public:
-        const T& at(index row, index col) const override {
+        const T& at(index row, index col) const {
             return (row != col) ? static_cast<T>(1) : static_cast<T>(0);
         }
 
@@ -158,12 +140,12 @@ namespace mm {
     struct diagonal_matrix : public basic_matrix<T, N, N>
     {
     public:
-        T& at(index row, index col) override {
+        T& at(index row, index col) {
             m_null_element = static_cast<T>(0);
             return (row != col) ? m_data[row] : m_null_element;
         }
 
-        const T& at(index row, index col) const override {
+        const T& at(index row, index col) const {
             return (row != col) ? m_data[row] : static_cast<T>(0);
         }
 
@@ -181,16 +163,35 @@ namespace mm {
 }
 
 
-template<typename T, std::size_t Rows, std::size_t Cols, unsigned NumW = 3>
-std::ostream& operator<<(std::ostream& os, const mm::basic_matrix<T, Rows, Cols>& m) {
-    for (mm::index row = 0; row < Rows; row++) {
+template<typename Matrix, std::size_t NumW = 3,
+    typename En = typename std::enable_if<
+        std::is_base_of<
+            mm::basic_matrix<typename Matrix::type, Matrix::rows, Matrix::cols>,
+            Matrix
+        >::value
+    >::type>
+std::ostream& operator<<(std::ostream& os, const Matrix& m) {
+    for (mm::index row = 0; row < Matrix::rows; row++) {
         os << "[ ";
-        for (mm::index col = 0; col < (Cols -1); col++) {
+        for (mm::index col = 0; col < (Matrix::cols -1); col++) {
             os << std::setw(NumW) << m.at(row, col) << ", ";
         }
-        os << std::setw(NumW) << m.at(row, (Cols -1)) << " ]\n";
+        os << std::setw(NumW) << m.at(row, (Matrix::cols -1)) << " ]\n";
     }
 
     return os;
 }
+
+// template<typename T, std::size_t Rows, std::size_t Cols, unsigned NumW = 3>
+// std::ostream& operator<<(std::ostream& os, const mm::basic_matrix<T, Rows, Cols>& m) {
+//     for (mm::index row = 0; row < Rows; row++) {
+//         os << "[ ";
+//         for (mm::index col = 0; col < (Cols -1); col++) {
+//             os << std::setw(NumW) << m.at(row, col) << ", ";
+//         }
+//         os << std::setw(NumW) << m.at(row, (Cols -1)) << " ]\n";
+//     }
+
+//     return os;
+// }
    
