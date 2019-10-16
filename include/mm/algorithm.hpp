@@ -1,20 +1,59 @@
 #pragma once
 
+#include "mm/mmmatrix.hpp"
+
 namespace mm {
     namespace view  {
-        template<typename Matrix>
+        namespace details {
+            struct viewer_base {};
+        }
+
+        template<typename Matrix, enable_if_matrix_t<Matrix>>
         struct row
         {
-            using T = typename Matrix::type;
+            using type = typename Matrix::type;
+            using cols = typename Matrix::cols;
 
             Matrix& matrix;
             index i;
 
             explicit row(index r, Matrix& m) : i(r), matrix(m) {}
 
-            T& at(index j) {
+            type& at(index j) {
                 return matrix.at(i, j);
             }
+        };
+
+        template<typename Matrix, enable_if_matrix_t<Matrix>>
+        struct col
+        {
+            using type = typename Matrix::type;
+            using rows = typename Matrix::rows;
+
+            Matrix& matrix;
+            index j;
+
+            explicit col(index c, Matrix& m) : j(c), matrix(m) {}
+
+            type& at(index i) {
+                return matrix.at(i, j);
+            }
+        };
+
+        template<typename Matrix,
+            std::size_t SubRows,
+            std::size_t SubCols,
+            enable_if_matrix_t<Matrix>>
+        struct submatrix 
+        {
+            using type = typename Matrix::type;
+            static constexpr std::size_t rows = SubRows;
+            static constexpr std::size_t cols = SubCols;
+
+            Matrix& matrix;
+            index i, j;
+
+            explicit submatrix(index row, index col, Matrix& m) : i(row), j(col), matrix(m) {}
         };
     }
 
@@ -39,7 +78,7 @@ namespace mm {
         constexpr auto& tr = transpose;
 
         /* inverse matrix */
-        template<typename Matrix>
+        template<typename Matrix, enable_if_matrix_t<Matrix>>
         struct inverse_of
         {
             Matrix matrix;
@@ -49,6 +88,10 @@ namespace mm {
             void operator()(Matrix& m) {
                 // TODO
             }
+
+            operator Matrix() {
+                std::move(matrix);
+            }
         };
 
         constexpr auto invert = [](auto& m) { 
@@ -56,14 +99,14 @@ namespace mm {
         };
 
         /* row reduction */
-        template<typename Matrix>
+        template<typename Matrix, typename _en = enable_if_matrix_t<Matrix>>
         struct row_reduction_of
         {
             using T = typename Matrix::type;
 
-            Matrix matrix;
+            Matrix& matrix;
 
-            row_reduction_of(const Matrix& m) : matrix(m) {}
+            row_reduction_of(Matrix& m) : matrix(m) {}
 
             void compute() {
                 index pivot_col = 0;

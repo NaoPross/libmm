@@ -1,7 +1,7 @@
 #include "mm/mmmatrix.hpp"
 #include "mm/view.hpp"
 
-#include "mm/fast/mmmatrix.hpp"
+// #include "mm/fast/mmmatrix.hpp"
 
 #include <iostream>
 #include <complex>
@@ -11,6 +11,8 @@ int main() {
 	// std::cout << "MxN dimensional (int) matrices" << std::endl;
 
     mm::matrix<int, 2, 2> a { 1, 2, 3, 4 };
+
+    // std::cout << a * (a | mm::alg::tr);
 
     // mm::matrix<int, 3, 2> a {{1, 2}, {3, 4}, {5, 6}};
     // mm::matrix<int, 3, 2> a {1, 2, 3, 4, 5, 6};
@@ -39,20 +41,20 @@ int main() {
     // std::cout << "a.td() = \n" << a.t(); // or a.trasposed();
     // std::cout << std::endl;
 
-    std::cout << "a = \n" << a;
+    // std::cout << "a = \n" << a;
 
-    std::cout << "Cloning a" << std::endl;
-    decltype(a) e = mm::clone(a) | mm::alg::transpose;
-    std::cout << "e = \n" << e;
-    std::cout << std::endl;
+    // std::cout << "Cloning a" << std::endl;
+    // decltype(a) e = mm::clone(a) | mm::alg::transpose;
+    // std::cout << "e = \n" << e;
+    // std::cout << std::endl;
 
-    std::cout << "Mutating a" << std::endl;
-    mm::mutate(a) | mm::alg::transpose;
-    std::cout << "a = \n" << a;
-    std::cout << std::endl;
+    // std::cout << "Mutating a" << std::endl;
+    // mm::mutate(a) | mm::alg::transpose;
+    // std::cout << "a = \n" << a;
+    // std::cout << std::endl;
 
-    decltype(a) b = a | mm::alg::rref;
-    std::cout << b;
+    // decltype(a) b = a | mm::alg::tr;
+    // std::cout << b;
 
     // std::cout << "Converting clone object" << std::endl;
     // mm::matrix<int, 2, 2> g = e;

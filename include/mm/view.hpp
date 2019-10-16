@@ -8,7 +8,7 @@
 
 
 namespace mm {
-    template<typename Matrix>
+    template<typename Matrix, typename _en = enable_if_matrix_t<Matrix>>
     struct clone
     {
         Matrix matrix;
@@ -21,7 +21,7 @@ namespace mm {
         }
     };
 
-    template<typename Matrix, typename ...Algs>
+    template<typename Matrix, typename _en = enable_if_matrix_t<Matrix>, typename ...Algs>
     struct mutate
     {
         Matrix& matrix;
@@ -48,7 +48,7 @@ namespace mm {
         }
     };
 
-    template<typename Matrix, typename Alg>
+    template<typename Matrix, typename Alg, enable_if_matrix_t<Matrix>>
     clone<Matrix> operator|(clone<Matrix>&& cl, Alg&& v) {
         /// must be callable with argument Matrix&
         static_assert(std::is_invocable<Alg, Matrix&>::value);
@@ -60,7 +60,7 @@ namespace mm {
         return std::move(cl);
     }
 
-    template<typename Matrix, typename ...Algs, typename Alg>
+    template<typename Matrix, typename ...Algs, typename Alg, enable_if_matrix_t<Matrix>>
     mutate<Matrix, Algs..., Alg> operator|(mutate<Matrix, Algs...>&& mut, Alg&& v) {
         /// must be callable with argument Matrix&
         static_assert(std::is_invocable<Alg, Matrix&>::value);
@@ -71,14 +71,14 @@ namespace mm {
 
     /// operator| between matrix and alg lambda
     /// defaults to wrapping matrix with a mutable
-    template<typename Matrix, typename Alg>
+    template<typename Matrix, typename Alg, enable_if_matrix_t<Matrix>>
     mutate<Matrix, Alg> operator|(Matrix& m, Alg& v) {
         return mutate(m) | std::move(v);
     }
 
     /// operator| between matrix and alg rvalue object
     /// defaults to wrapping matrix with a mutable
-    template<typename Matrix, typename Alg>
+    template<typename Matrix, typename Alg, enable_if_matrix_t<Matrix>>
     mutate<Matrix, Alg> operator|(Matrix& m, Alg&& v) {
         return m | static_cast<Alg&>(v);
     }
