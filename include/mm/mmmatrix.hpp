@@ -48,6 +48,27 @@ namespace mm {
 }
 
 /*
+ * Template helper functions
+ */
+namespace mm {
+
+    template<typename Matrix>
+    struct enable_if_matrix
+    {
+        static constexpr std::size_t Rows = Matrix::rows;
+        static constexpr std::size_t Cols = Matrix::cols;
+        static constexpr bool value = std::is_base_of<
+                mm::basic_matrix<typename Matrix::type, Rows, Cols>,
+                Matrix
+            >::value;
+    };
+
+    template<typename Matrix>
+    using enable_if_matrix_t = typename enable_if_matrix<Matrix>::type;
+
+}
+
+/*
  * Matrix Classes
  */
 namespace mm {
@@ -88,7 +109,7 @@ namespace mm {
                 std::is_convertible<E, T>::value
             >::type... 
         >
-        matrix(E ...e) : m_data({{std::forward<E>(e)...}}) {}
+        constexpr matrix(E ...e) : m_data({{std::forward<E>(e)...}}) {}
 
         matrix(const matrix<T, Rows, Cols>& o) 
             : basic_matrix<T, Rows, Cols>(o), m_data(o.m_data) {}
@@ -127,7 +148,7 @@ namespace mm {
     struct identity_matrix : public basic_matrix<T, N, N>
     {
     public:
-        const T& at(index row, index col) const {
+        constexpr T& at(index row, index col) const {
             return (row != col) ? static_cast<T>(1) : static_cast<T>(0);
         }
 
@@ -155,21 +176,11 @@ namespace mm {
     };
 }
 
+
 /*
- *  Matrix Opertors
+ * to ostream conversion
  */
-
-namespace mm {
-}
-
-
-template<typename Matrix, std::size_t NumW = 3,
-    typename En = typename std::enable_if<
-        std::is_base_of<
-            mm::basic_matrix<typename Matrix::type, Matrix::rows, Matrix::cols>,
-            Matrix
-        >::value
-    >::type>
+template<typename Matrix, std::size_t NumW = 3, typename En = mm::enable_if_matrix_t<Matrix>>
 std::ostream& operator<<(std::ostream& os, const Matrix& m) {
     for (mm::index row = 0; row < Matrix::rows; row++) {
         os << "[ ";
@@ -182,16 +193,12 @@ std::ostream& operator<<(std::ostream& os, const Matrix& m) {
     return os;
 }
 
-// template<typename T, std::size_t Rows, std::size_t Cols, unsigned NumW = 3>
-// std::ostream& operator<<(std::ostream& os, const mm::basic_matrix<T, Rows, Cols>& m) {
-//     for (mm::index row = 0; row < Rows; row++) {
-//         os << "[ ";
-//         for (mm::index col = 0; col < (Cols -1); col++) {
-//             os << std::setw(NumW) << m.at(row, col) << ", ";
-//         }
-//         os << std::setw(NumW) << m.at(row, (Cols -1)) << " ]\n";
-//     }
+template<typename T, std::size_t Rows, std::size_t Cols>
+mm::matrix<T, Rows, Cols> operator*(mm::matrix<T, Rows, Cols> lhs, mm::matrix<T, Rows, Cols> rhs) {
+    mm::matrix<T, Rows, Cols> res;
+    for (mm::index r = 0; r < Rows; r++) {
+        for (mm::index c = 0; c < Cols; c++) {
 
-//     return os;
-// }
-   
+        }
+    }
+}
